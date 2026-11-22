@@ -167,7 +167,8 @@
     pct = Math.max(2, Math.min(98, pct));
     line.style.top = pct.toFixed(2) + '%';
     document.getElementById('tide-water').style.top = pct.toFixed(2) + '%';
-    nowEl.style.top = 'calc(' + pct.toFixed(2) + '% - 1.25rem)';
+    // Keep the label clear of the High/Low rows: above the line in the lower half, below it in the upper half.
+    nowEl.style.top = pct > 50 ? 'calc(' + pct.toFixed(2) + '% - 1.25rem)' : 'calc(' + pct.toFixed(2) + '% + 0.25rem)';
     nowEl.textContent = 'Now ' + h.toFixed(1) + ' ft, ' + (next.v > prev.v ? 'rising' : 'falling');
     highEl.textContent = fmtExtreme(high);
     lowEl.textContent = fmtExtreme(low);
