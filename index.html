@@ -16,25 +16,24 @@
     --quiet: #555;
     --rule: #111;
     --edge: rgba(17, 17, 17, 0.22);
-    --water: rgba(21, 32, 42, 0.06);
+    --water: rgba(32, 62, 82, 0.10);
   }
   @media (prefers-color-scheme: dark) {
-    :root { --ground: #15202a; --ink: #e8e3d8; --quiet: #9fb3bd; --rule: #4e6572; --edge: rgba(159, 179, 189, 0.35); --water: rgba(159, 179, 189, 0.10); }
+    :root { --ground: #15202a; --ink: #e8e3d8; --quiet: #9fb3bd; --rule: #4e6572; --edge: rgba(159, 179, 189, 0.35); --water: rgba(159, 179, 189, 0.14); }
   }
   html, body { margin: 0; background: var(--ground); color: var(--ink); }
   body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    gap: 3rem;
+    gap: 4rem;
     box-sizing: border-box;
     padding: 2.5rem 1.5rem;
     font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
     font-size: 1.125rem;
     line-height: 1.55;
   }
-  header, main, footer { max-width: 40rem; width: 100%; margin: 0 auto; }
-  footer { margin-top: auto; }
+  header, main, footer, .tide { max-width: 40rem; width: 100%; margin: 0 auto; }
   .mark {
     font-family: 'Space Grotesk', system-ui, sans-serif;
     font-weight: 500;
@@ -43,20 +42,13 @@
     text-decoration: none;
     color: var(--ink);
   }
-  .rule {
-    width: 100%;
-    height: 1px;
-    margin: 1.25rem 0 0;
-    background-image: linear-gradient(to right, var(--rule) 1px, transparent 1px);
-    background-size: 6px 1px;
-  }
   h1 {
     font-family: 'Space Grotesk', system-ui, sans-serif;
     font-weight: 500;
     font-size: 1.75rem;
     letter-spacing: -0.01em;
     line-height: 1.2;
-    margin: 0 0 0.75rem;
+    margin: 0;
   }
   p { margin: 0; }
   .quiet { color: var(--quiet); }
@@ -65,7 +57,8 @@
 
   /* The tide: a dotted line that sits at the current water height at Alameda,
      between the high and low it is moving between. */
-  .tide { margin-top: 2.5rem; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 0.875rem; color: var(--quiet); }
+  .tide { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 0.875rem; color: var(--quiet); }
+  .tide-date { margin-bottom: 0.75rem; }
   .tide-edge { display: flex; justify-content: space-between; align-items: baseline; }
   .tide-band {
     position: relative; height: 6rem; margin: 0.375rem 0;
@@ -95,14 +88,15 @@
 <body>
   <header>
     <a class="mark" href="/">Tideline</a>
-    <div class="rule" aria-hidden="true"></div>
   </header>
 
   <main>
-    <h1>Fixing, making, and sailing. Mostly aboard Caroline.</h1>
-    <p class="quiet">A log kept by Elliott and Sammy. First entries early 2027.</p>
+    <h1>Fixing, making, and sailing. Mostly aboard Caroline. First entries early 2027.</h1>
 
-    <div class="tide" id="tide" hidden>
+  </main>
+
+  <div class="tide" id="tide" hidden>
+      <p class="tide-date" id="tide-date"></p>
       <div class="tide-edge"><span>High</span><span id="tide-high"></span></div>
       <div class="tide-band" aria-hidden="true">
         <div class="tide-water" id="tide-water"></div>
@@ -111,7 +105,6 @@
       </div>
       <div class="tide-edge"><span>Low</span><span id="tide-low"></span></div>
     </div>
-  </main>
 
   <footer>
     <p>Caroline is a Bristol Channel Cutter 28, kept on San Francisco Bay.</p>
@@ -128,6 +121,7 @@
   var nowEl = document.getElementById('tide-now');
   var highEl = document.getElementById('tide-high');
   var lowEl = document.getElementById('tide-low');
+  var dateEl = document.getElementById('tide-date');
   var extremes = null;
 
   function ymd(d) { return d.toISOString().slice(0, 10).replace(/-/g, ''); }
@@ -170,6 +164,7 @@
     // Keep the label clear of the High/Low rows: above the line in the lower half, below it in the upper half.
     nowEl.style.top = pct > 50 ? 'calc(' + pct.toFixed(2) + '% - 1.25rem)' : 'calc(' + pct.toFixed(2) + '% + 0.25rem)';
     nowEl.textContent = 'Now ' + h.toFixed(1) + ' ft, ' + (next.v > prev.v ? 'rising' : 'falling');
+    dateEl.textContent = 'Alameda, ' + now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'America/Los_Angeles' });
     highEl.textContent = fmtExtreme(high);
     lowEl.textContent = fmtExtreme(low);
     tide.hidden = false;
