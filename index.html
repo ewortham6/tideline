@@ -16,9 +16,10 @@
     --quiet: #555;
     --rule: #111;
     --edge: rgba(17, 17, 17, 0.22);
+    --water: rgba(21, 32, 42, 0.06);
   }
   @media (prefers-color-scheme: dark) {
-    :root { --ground: #15202a; --ink: #e8e3d8; --quiet: #9fb3bd; --rule: #4e6572; --edge: rgba(159, 179, 189, 0.35); }
+    :root { --ground: #15202a; --ink: #e8e3d8; --quiet: #9fb3bd; --rule: #4e6572; --edge: rgba(159, 179, 189, 0.35); --water: rgba(159, 179, 189, 0.10); }
   }
   html, body { margin: 0; background: var(--ground); color: var(--ink); }
   body {
@@ -70,6 +71,11 @@
     position: relative; height: 6rem; margin: 0.375rem 0;
     border-top: 1px solid var(--edge); border-bottom: 1px solid var(--edge);
   }
+  .tide-water {
+    position: absolute; left: 0; right: 0; bottom: 0; top: 50%;
+    background: var(--water);
+    transition: top 60s linear;
+  }
   .tide-line {
     position: absolute; left: 0; right: 0; top: 50%;
     height: 1px;
@@ -83,7 +89,7 @@
     transition: top 60s linear;
   }
   .tide[hidden] { display: none; }
-  @media (prefers-reduced-motion: reduce) { .tide-line, .tide-now { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .tide-line, .tide-now, .tide-water { transition: none; } }
 </style>
 </head>
 <body>
@@ -99,6 +105,7 @@
     <div class="tide" id="tide" hidden>
       <div class="tide-edge"><span>High</span><span id="tide-high"></span></div>
       <div class="tide-band" aria-hidden="true">
+        <div class="tide-water" id="tide-water"></div>
         <div class="tide-line" id="tide-line"></div>
         <span class="tide-now" id="tide-now"></span>
       </div>
@@ -159,6 +166,7 @@
     var pct = (high.v - h) / (high.v - low.v) * 100;             // high water at the top edge
     pct = Math.max(2, Math.min(98, pct));
     line.style.top = pct.toFixed(2) + '%';
+    document.getElementById('tide-water').style.top = pct.toFixed(2) + '%';
     nowEl.style.top = 'calc(' + pct.toFixed(2) + '% - 1.25rem)';
     nowEl.textContent = 'Now ' + h.toFixed(1) + ' ft, ' + (next.v > prev.v ? 'rising' : 'falling');
     highEl.textContent = fmtExtreme(high);
