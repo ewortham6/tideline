@@ -70,7 +70,7 @@
     transition: top 60s linear;
   }
   .buoy:focus-visible { outline: 1px dotted var(--ink); outline-offset: 6px; }
-  .buoy-window { position: absolute; left: -12px; top: -40px; width: 96px; height: 83px; overflow: hidden; }
+  .buoy-window { position: absolute; left: -12px; top: -40px; width: 96px; height: 90px; overflow: hidden; }
   .buoy-body {
     position: absolute; left: 25.5px; top: 47.4px; width: 45px; height: 39.6px;
     transform-origin: 50% calc(100% - 4px); animation: bob 3.4s ease-in-out infinite;
@@ -172,6 +172,7 @@
   var svg = document.getElementById('tideline-svg');
   var path = document.getElementById('tideline-path');
   var water = document.getElementById('t-water');
+  var win = document.querySelector('.buoy-window');
   var nowEl = document.getElementById('t-now');
   var extremes = null, pct = 50, lastPointer = 'mouse', loadedAt = 0;
 
@@ -193,6 +194,14 @@
     path.setAttribute('d', d);
     // The water's top edge follows the same curve (half a pixel lower, so the drawn line always covers the seam).
     var edge = d.replace(/ 8(?= |$)/g, ' 8.5').replace(/ 4\.5 /g, ' 5 ');
+    // The buoy's window ends exactly on the wave beneath it, so nothing shows below the water as it rocks.
+    var x0 = w - half * Math.ceil(w / half + 1), left = w - 108, pts = ['0px -60px', '96px -60px'];
+    for (var lx = 96; lx >= 0; lx -= 2) {
+      var X = left + lx, k = Math.floor((X - x0) / half), t = (X - x0 - k * half) / half;
+      var c = (k % 2 === 0) ? 4.5 : 11.5, wy = 8 + (c - 8) * 2 * t * (1 - t);
+      pts.push(lx + 'px ' + (wy + 74.5).toFixed(2) + 'px');
+    }
+    win.style.clipPath = 'polygon(' + pts.join(', ') + ')';
     water.style.clipPath = "path('" + edge + ' L ' + w + ' 9999 L ' + (w - half * Math.ceil(w / half + 1)) + " 9999 Z')";
   }
 
