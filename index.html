@@ -191,6 +191,9 @@
     }
     svg.setAttribute('viewBox', '0 0 ' + w + ' 16');
     path.setAttribute('d', d);
+    // The water's top edge follows the same curve (half a pixel lower, so the drawn line always covers the seam).
+    var edge = d.replace(/ 8(?= |$)/g, ' 8.5').replace(/ 4\.5 /g, ' 5 ');
+    water.style.clipPath = "path('" + edge + ' L ' + w + ' 9999 L ' + (w - half * Math.ceil(w / half + 1)) + " 9999 Z')";
   }
 
   function place() {
@@ -199,7 +202,7 @@
     document.documentElement.style.setProperty('--bb', (vh * (BAND_TOP + BAND_SPAN)) + 'px');
     buoy.style.top = (y - WATERLINE) + 'px';
     tideline.style.top = (y - 8) + 'px';
-    water.style.top = y + 'px';
+    water.style.top = (y - 8) + 'px';
     nowEl.style.top = (pct > 50 ? y - 26 : y + 10) + 'px';   // keep the reading clear of the High / Low rows
   }
 
