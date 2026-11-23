@@ -72,8 +72,8 @@
   .buoy:focus-visible { outline: 1px dotted var(--ink); outline-offset: 6px; }
   .buoy-window { position: absolute; left: -12px; top: -40px; width: 96px; height: 83px; overflow: hidden; }
   .buoy-body {
-    position: absolute; left: 25.5px; top: 43.4px; width: 45px; height: 39.6px;
-    transform-origin: 50% 100%; animation: bob 3.4s ease-in-out infinite;
+    position: absolute; left: 25.5px; top: 47.4px; width: 45px; height: 39.6px;
+    transform-origin: 50% calc(100% - 4px); animation: bob 3.4s ease-in-out infinite;
   }
   .buoy-body img { display: block; width: 45px; height: 39.6px; filter: var(--sketch); }
   @keyframes bob { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
