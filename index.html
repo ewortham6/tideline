@@ -103,6 +103,15 @@
   }
   .t-now { transition: top 60s linear; }
 
+  /* Quiet marks at the ends of the buoy's travel, so its height reads as a tide without hovering. */
+  .tick {
+    position: fixed; right: 0.5rem; z-index: 4; transform: translateY(-50%);
+    display: flex; align-items: center; gap: 4px;
+    font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 0.6875rem; color: var(--quiet);
+  }
+  .tick::after { content: ""; width: 10px; height: 1px; background: var(--edge); }
+  .tick[hidden] { display: none; }
+
   .tide-open .takeover { opacity: 1; }
   .tide-open .tideline { clip-path: inset(-6px 0 -6px 0); }
   .placing .buoy, .placing .tideline, .placing .t-water, .placing .t-now { transition: none; }
@@ -136,6 +145,9 @@
     <p class="t-left" style="top: calc(86vh + 0.5rem)">Low</p>
     <p class="t-right" style="top: calc(86vh + 0.5rem)" id="t-low"></p>
   </div>
+
+  <div class="tick" id="tick-h" hidden aria-hidden="true" style="top: 14vh">H</div>
+  <div class="tick" id="tick-l" hidden aria-hidden="true" style="top: 86vh">L</div>
 
   <div class="tideline" id="tideline" hidden aria-hidden="true">
     <svg id="tideline-svg" preserveAspectRatio="none">
@@ -223,6 +235,7 @@
     place();
     if (buoy.hidden) {
       buoy.hidden = false; tideline.hidden = false;
+      document.getElementById('tick-h').hidden = false; document.getElementById('tick-l').hidden = false;
       requestAnimationFrame(function () { requestAnimationFrame(function () { body.classList.remove('placing'); }); });
     }
   }
