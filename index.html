@@ -38,7 +38,7 @@
     font-size: 1.125rem;
     line-height: 1.55;
   }
-  @media (max-width: 760px) { body { padding-right: 6rem; } }   /* keep text clear of the buoy on phones */
+  @media (max-width: 900px) { body { padding-right: 6rem; } }   /* keep text clear of the buoy on phones and tablets */
   header, main, footer { max-width: 40rem; width: 100%; margin: 0 auto; }
   footer { margin-top: auto; }
   .mark {
@@ -94,7 +94,7 @@
   .takeover p { position: absolute; }
   .t-left { left: 1.5rem; }
   .t-right { right: 7rem; }
-  @media (min-width: 761px) { .t-left { left: 3rem; } }
+  @media (min-width: 901px) { .t-left { left: 3rem; } }
   .t-edge { position: absolute; left: 0; right: 0; height: 1px; background: var(--edge); }
   .t-water {
     position: absolute; left: 0; right: 0; bottom: 0; top: 50vh;
@@ -136,18 +136,18 @@
 
   <div class="takeover" id="takeover" aria-live="polite">
     <p class="t-left" style="top: 2.5rem" id="t-date"></p>
-    <div class="t-edge" style="top: 14vh"></div>
-    <p class="t-left" style="top: calc(14vh - 1.6rem)">High</p>
-    <p class="t-right" style="top: calc(14vh - 1.6rem)" id="t-high"></p>
+    <div class="t-edge" style="top: var(--bt, 14vh)"></div>
+    <p class="t-left" style="top: calc(var(--bt, 14vh) - 1.6rem)">High</p>
+    <p class="t-right" style="top: calc(var(--bt, 14vh) - 1.6rem)" id="t-high"></p>
     <div class="t-water" id="t-water"></div>
     <p class="t-right t-now" id="t-now"></p>
-    <div class="t-edge" style="top: 86vh"></div>
-    <p class="t-left" style="top: calc(86vh + 0.5rem)">Low</p>
-    <p class="t-right" style="top: calc(86vh + 0.5rem)" id="t-low"></p>
+    <div class="t-edge" style="top: var(--bb, 86vh)"></div>
+    <p class="t-left" style="top: calc(var(--bb, 86vh) + 0.5rem)">Low</p>
+    <p class="t-right" style="top: calc(var(--bb, 86vh) + 0.5rem)" id="t-low"></p>
   </div>
 
-  <div class="tick" id="tick-h" hidden aria-hidden="true" style="top: 14vh">H</div>
-  <div class="tick" id="tick-l" hidden aria-hidden="true" style="top: 86vh">L</div>
+  <div class="tick" id="tick-h" hidden aria-hidden="true" style="top: var(--bt, 14vh)">H</div>
+  <div class="tick" id="tick-l" hidden aria-hidden="true" style="top: var(--bb, 86vh)">L</div>
 
   <div class="tideline" id="tideline" hidden aria-hidden="true">
     <svg id="tideline-svg" preserveAspectRatio="none">
@@ -173,7 +173,7 @@
   var path = document.getElementById('tideline-path');
   var water = document.getElementById('t-water');
   var nowEl = document.getElementById('t-now');
-  var extremes = null, pct = 50, lastPointer = 'mouse';
+  var extremes = null, pct = 50, lastPointer = 'mouse', loadedAt = 0;
 
   function ymd(d) { return d.toISOString().slice(0, 10).replace(/-/g, ''); }
   function parseUTC(s) { return new Date(s.replace(' ', 'T') + 'Z'); }
@@ -194,7 +194,9 @@
   }
 
   function place() {
-    var y = window.innerHeight * (BAND_TOP + BAND_SPAN * pct / 100);
+    var vh = window.innerHeight, y = vh * (BAND_TOP + BAND_SPAN * pct / 100);
+    document.documentElement.style.setProperty('--bt', (vh * BAND_TOP) + 'px');
+    document.documentElement.style.setProperty('--bb', (vh * (BAND_TOP + BAND_SPAN)) + 'px');
     buoy.style.top = (y - WATERLINE) + 'px';
     tideline.style.top = (y - 8) + 'px';
     water.style.top = y + 'px';
@@ -209,6 +211,7 @@
       + '&begin_date=' + ymd(from) + '&end_date=' + ymd(to);
     fetch(url).then(function (r) { return r.json(); }).then(function (j) {
       if (!j.predictions || !j.predictions.length) throw new Error('no data');
+      loadedAt = Date.now();
       extremes = j.predictions.map(function (p) { return { t: parseUTC(p.t), v: parseFloat(p.v) }; });
       render();
     }).catch(function () { /* no data: the buoy stays hidden */ });
@@ -256,7 +259,16 @@
 
   window.addEventListener('resize', function () {
     body.classList.add('placing'); drawLine(); place();
-    requestAnimationFrame(function () { body.classList.remove('placing'); });
+    requestAnimationFrame(function () { requestAnimationFrame(function () { body.classList.remove('placing'); }); });
+  });
+
+  function snap() {
+    body.classList.add('placing'); render();
+    requestAnimationFrame(function () { requestAnimationFrame(function () { body.classList.remove('placing'); }); });
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState !== 'visible') return;
+    if (Date.now() - loadedAt > 6 * 3600000) load(); else snap();
   });
 
   drawLine();
